@@ -61,3 +61,51 @@ class MySeleniumTests(StaticLiveServerTestCase):
         # utilitzem assertNotEqual per testejar que NO hem entrat
         self.assertNotEqual( self.selenium.title , "Site administration | Django site admin" )
 
+    def test_crear_usuario_sense_permisos_i_login_fallit(self):
+        # 1. Navegar al panell d'administració de Django
+        self.selenium.get(self.live_server_url + "/admin")
+
+        # 2. Iniciar sessió com a superusuari
+        username_input = self.selenium.find_element(By.NAME, "username")
+        username_input.send_keys("isard")
+        password_input = self.selenium.find_element(By.NAME, "password")
+        password_input.send_keys("pirineus")
+        self.selenium.find_element(By.XPATH, '//input[@value="Log in"]').click()
+
+        # 3. Navegar a la pàgina de creació d'usuaris
+        #self.selenium.find_element(By.LINK_TEXT, "Users").click()
+        #self.selenium.find_element(By.LINK_TEXT, "Add").click()
+        self.selenium.get(self.live_server_url + "/admin/auth/user/add/")
+        # 4. Omplir el formulari per crear un nou usuari sense permisos
+        # document:  https://selenium-python.readthedocs.io/locating-elements.html 
+        #username1_input = self.selenium.find_element(By.NAME, "username")
+        #username1_input = self.selenium.find_element("id", "id_username")
+        #username1_input = self.selenium.find_element(By.XPATH, '//input[@value="username"]')
+        #username1_input = self.selenium.find_element("css selector", "#id_username")
+        username1_input = self.selenium.find_element(By.ID, 'id_username')
+        username1_input.send_keys("ioc")
+        #password1_input = self.selenium.find_element(By.NAME, "password")
+        password1_input = self.selenium.find_element(By.ID, 'id_password1')
+        password1_input.send_keys("12345678ioc")
+        #password1_confirm_input = self.selenium.find_element(By.NAME, "password2")
+        password1_confirm_input = self.selenium.find_element(By.ID, 'id_password2')
+        password1_confirm_input.send_keys("12345678ioc")
+        #email_input = self.selenium.find_element(By.NAME, "email")
+        #email_input.send_keys("ioc@ioc.cat")
+        #self.selenium.find_element(By.XPATH, '//input[@value="Save"]').click()
+        self.selenium.find_element(By.NAME, "_save").click()
+
+
+        #LOG OUT
+        self.selenium.find_element(By.ID, 'logout-form').click()
+
+        # 5. Intentar iniciar sessió amb l'usuari sense permisos
+        self.selenium.get(self.live_server_url + "/admin/login/")
+        username_input = self.selenium.find_element(By.NAME, "username")
+        username_input.send_keys("ioc")
+        password_input = self.selenium.find_element(By.NAME, "password")
+        password_input.send_keys("12345678ioc")
+        self.selenium.find_element(By.XPATH, '//input[@value="Log in"]').click()
+
+        # 6. Verificar que l'inici de sessió ha fallat
+        self.assertIn("Please enter the correct username and password for a staff account. Note that both fields may be case-sensitive.", self.selenium.page_source)
