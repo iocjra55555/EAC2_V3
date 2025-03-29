@@ -62,10 +62,11 @@ class MySeleniumTests(StaticLiveServerTestCase):
         self.assertNotEqual( self.selenium.title , "Site administration | Django site admin" )
 
     def test_crear_usuario_sense_permisos_i_login_fallit(self):
+        # document:  https://selenium-python.readthedocs.io/locating-elements.html 
         # 1. Navegar al panell d'administració de Django
         self.selenium.get(self.live_server_url + "/admin")
 
-        # 2. Iniciar sessió com a superusuari
+        # 2. Iniciar sessió com a superusuari i entrar web-admin
         username_input = self.selenium.find_element(By.NAME, "username")
         username_input.send_keys("isard")
         password_input = self.selenium.find_element(By.NAME, "password")
@@ -73,11 +74,14 @@ class MySeleniumTests(StaticLiveServerTestCase):
         self.selenium.find_element(By.XPATH, '//input[@value="Log in"]').click()
 
         # 3. Navegar a la pàgina de creació d'usuaris
+        #va directament a la pagina per entrar usuari
+        #self.selenium.get(self.live_server_url + "/admin/auth/user/add/")
         #self.selenium.find_element(By.LINK_TEXT, "Users").click()
         #self.selenium.find_element(By.LINK_TEXT, "Add").click()
-        self.selenium.get(self.live_server_url + "/admin/auth/user/add/")
+        self.selenium.find_element(By.XPATH, '/html/body/div/div/main/div/div[1]/div[1]/table/tbody/tr[2]/th/a').click()
+        self.selenium.find_element(By.XPATH, '/html/body/div/div/main/div/div/ul/li/a').click()
+
         # 4. Omplir el formulari per crear un nou usuari sense permisos
-        # document:  https://selenium-python.readthedocs.io/locating-elements.html 
         #username1_input = self.selenium.find_element(By.NAME, "username")
         #username1_input = self.selenium.find_element("id", "id_username")
         #username1_input = self.selenium.find_element(By.XPATH, '//input[@value="username"]')
@@ -95,8 +99,7 @@ class MySeleniumTests(StaticLiveServerTestCase):
         #self.selenium.find_element(By.XPATH, '//input[@value="Save"]').click()
         self.selenium.find_element(By.NAME, "_save").click()
 
-
-        #LOG OUT
+        #4.5 LOG OUT, per provar el usuari nou sense permissos
         self.selenium.find_element(By.ID, 'logout-form').click()
 
         # 5. Intentar iniciar sessió amb l'usuari sense permisos
